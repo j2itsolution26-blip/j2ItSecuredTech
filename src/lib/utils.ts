@@ -1,0 +1,121 @@
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+export function formatDateTime(date: Date | string | null | undefined): string {
+  if (!date) return '—';
+  return new Date(date).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+export function formatRelativeTime(date: Date | string): string {
+  const target = new Date(date).getTime();
+  const diffSeconds = Math.round((target - Date.now()) / 1000);
+
+  const thresholds: [Intl.RelativeTimeFormatUnit, number][] = [
+    ['second', 60],
+    ['minute', 60],
+    ['hour', 24],
+    ['day', 7],
+    ['week', 4.35],
+    ['month', 12],
+    ['year', Number.POSITIVE_INFINITY],
+  ];
+
+  const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  let value = diffSeconds;
+
+  for (const [unit, limit] of thresholds) {
+    if (Math.abs(value) < limit) return formatter.format(Math.round(value), unit);
+    value /= limit;
+  }
+
+  return formatter.format(Math.round(value), 'year');
+}
+
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(value);
+}
+
+export function formatBytes(bytes: number): string {
+  if (bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+/** Average adult reading speed, rounded up to whole minutes. */
+export function estimateReadingTime(content: string): number {
+  const words = content.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 220));
+}
+
+export function truncate(value: string, length: number): string {
+  if (value.length <= length) return value;
+  return `${value.slice(0, length).trimEnd()}…`;
+}
+
+/** Converts SCREAMING_SNAKE enum members into readable labels. */
+export function humanizeEnum(value: string): string {
+  return value
+    .toLowerCase()
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+export function initialsOf(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+/** Safely coerces a search param that may arrive as an array. */
+export function firstParam(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+export function parsePage(value: string | string[] | undefined): number {
+  const parsed = Number.parseInt(firstParam(value) ?? '1', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}

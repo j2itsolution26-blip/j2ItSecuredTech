@@ -15,10 +15,13 @@ export const COMPANY_INFO = {
   founded: 2016,
   phone: '+63 (02) 8888-5273',
   phoneAlt: '+63 917 123 4567',
-  email: 'info@j2securetech.com',
-  salesEmail: 'sales@j2securetech.com',
-  supportEmail: 'support@j2securetech.com',
-  careersEmail: 'careers@j2securetech.com',
+  // Single operating mailbox. These stay separate fields so each can be
+  // pointed at a dedicated address later from Admin -> Settings, with no
+  // redeploy; the contact page collapses duplicates when they match.
+  email: 'j2itsolution26@gmail.com',
+  salesEmail: 'j2itsolution26@gmail.com',
+  supportEmail: 'j2itsolution26@gmail.com',
+  careersEmail: 'j2itsolution26@gmail.com',
   address: 'Suite 1204, Enterprise Cyber Tower, Tech Hub District, Metro Manila, Philippines',
   addressParts: {
     street: 'Suite 1204, Enterprise Cyber Tower',

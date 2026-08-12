@@ -23,33 +23,49 @@ export default async function ContactPage() {
     settings['contact.mapQuery'],
   )}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
-  const channels: {
-    icon: typeof Phone;
-    title: string;
-    lines: { label: string; href?: string }[];
-  }[] = [
+  type ContactLine = { label: string; href?: string };
+
+  /**
+   * Collapses repeated entries and drops blanks. Sales, support and general
+   * enquiries may all point at one mailbox, and listing the same address twice
+   * looks like a mistake rather than a choice.
+   */
+  const uniqueLines = (lines: ContactLine[]): ContactLine[] => {
+    const seen = new Set<string>();
+    return lines.filter((line) => {
+      const key = line.label?.trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const telHref = (value: string) => `tel:${value.replace(/[^+\d]/g, '')}`;
+
+  const channels: { icon: typeof Phone; title: string; lines: ContactLine[] }[] = [
     {
       icon: Phone,
       title: 'Call us',
-      lines: [
-        { label: settings['contact.phone'], href: `tel:${settings['contact.phone'].replace(/[^+\d]/g, '')}` },
-        { label: settings['contact.phoneAlt'], href: `tel:${settings['contact.phoneAlt'].replace(/[^+\d]/g, '')}` },
-      ],
+      lines: uniqueLines([
+        { label: settings['contact.phone'], href: telHref(settings['contact.phone']) },
+        { label: settings['contact.phoneAlt'], href: telHref(settings['contact.phoneAlt']) },
+      ]),
     },
     {
       icon: Mail,
       title: 'Email us',
-      lines: [
+      lines: uniqueLines([
         { label: settings['contact.salesEmail'], href: `mailto:${settings['contact.salesEmail']}` },
         { label: settings['contact.supportEmail'], href: `mailto:${settings['contact.supportEmail']}` },
-      ],
+        { label: settings['contact.email'], href: `mailto:${settings['contact.email']}` },
+      ]),
     },
     {
       icon: MapPin,
       title: 'Visit us',
-      lines: [{ label: settings['contact.address'] }],
+      lines: uniqueLines([{ label: settings['contact.address'] }]),
     },
-  ];
+  ].filter((channel) => channel.lines.length > 0);
 
   return (
     <>

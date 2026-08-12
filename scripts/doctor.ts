@@ -77,13 +77,28 @@ async function main() {
     return;
   }
 
-  ok(`DATABASE_URL is set  (${redact(connectionString)})`);
-
   if (!/^postgres(ql)?:\/\//.test(connectionString)) {
     bad('DATABASE_URL is not a PostgreSQL connection string');
     process.exitCode = 1;
     return;
   }
+
+  // Catch template values before attempting a connection, so the failure names
+  // the placeholder instead of surfacing an opaque DNS or auth error.
+  const placeholders = [
+    'PASTE_PASSWORD_HERE', 'YOUR-PASSWORD', 'YOUR_PASSWORD',
+    '[YOUR-PASSWORD]', 'aws-0-REGION', '<region>', 'REGION.pooler',
+    'PASSWORD@', 'user:password',
+  ].filter((token) => connectionString.includes(token));
+
+  if (placeholders.length > 0) {
+    bad(`DATABASE_URL still contains placeholder text: ${placeholders.join(', ')}`);
+    info('Open .env and replace it with the real value from your database provider.');
+    process.exitCode = 1;
+    return;
+  }
+
+  ok(`DATABASE_URL is set  (${redact(connectionString)})`);
 
   describeEndpoint(connectionString);
 

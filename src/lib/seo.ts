@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { COMPANY_INFO } from '@/lib/constants';
 import { SITE_URL } from '@/lib/env';
+import { toIsoString } from '@/lib/utils';
 
 type PageMetadataInput = {
   title: string;
@@ -205,8 +206,9 @@ export function articleSchema(input: {
   description: string;
   path: string;
   image?: string | null;
-  publishedAt?: Date | null;
-  updatedAt?: Date | null;
+  // Cached reads yield ISO strings rather than Date instances — see toIsoString.
+  publishedAt?: Date | string | null;
+  updatedAt?: Date | string | null;
   author: string;
 }) {
   return {
@@ -216,8 +218,8 @@ export function articleSchema(input: {
     description: input.description,
     url: absoluteUrl(input.path),
     image: input.image ? [input.image] : [absoluteUrl('/opengraph-image')],
-    datePublished: input.publishedAt?.toISOString(),
-    dateModified: (input.updatedAt ?? input.publishedAt)?.toISOString(),
+    datePublished: toIsoString(input.publishedAt),
+    dateModified: toIsoString(input.updatedAt ?? input.publishedAt),
     author: { '@type': 'Person', name: input.author },
     publisher: { '@id': absoluteUrl('/#organization') },
     mainEntityOfPage: { '@type': 'WebPage', '@id': absoluteUrl(input.path) },
@@ -243,8 +245,8 @@ export function jobPostingSchema(input: {
   employmentType: string;
   location: string;
   isRemote: boolean;
-  datePosted: Date;
-  validThrough?: Date | null;
+  datePosted: Date | string;
+  validThrough?: Date | string | null;
 }) {
   return {
     '@context': 'https://schema.org',
@@ -252,8 +254,8 @@ export function jobPostingSchema(input: {
     title: input.title,
     description: input.description,
     employmentType: input.employmentType,
-    datePosted: input.datePosted.toISOString(),
-    validThrough: input.validThrough?.toISOString(),
+    datePosted: toIsoString(input.datePosted),
+    validThrough: toIsoString(input.validThrough),
     hiringOrganization: { '@id': absoluteUrl('/#organization') },
     jobLocationType: input.isRemote ? 'TELECOMMUTE' : undefined,
     jobLocation: {

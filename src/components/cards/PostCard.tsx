@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CalendarDays, Clock } from 'lucide-react';
 import type { BlogCard } from '@/lib/data/blog';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils';
+import { formatDate, toIsoString } from '@/lib/utils';
 
 export function PostCard({ post, priority = false }: { post: BlogCard; priority?: boolean }) {
   return (
@@ -40,7 +40,7 @@ export function PostCard({ post, priority = false }: { post: BlogCard; priority?
         <div className="mt-auto flex flex-wrap items-center gap-4 pt-6 text-xs text-subtle">
           <span className="inline-flex items-center gap-1.5">
             <CalendarDays className="size-3.5" aria-hidden="true" />
-            <time dateTime={post.publishedAt?.toISOString()}>{formatDate(post.publishedAt)}</time>
+            <time dateTime={toIsoString(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Clock className="size-3.5" aria-hidden="true" />

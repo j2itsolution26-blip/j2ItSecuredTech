@@ -13,7 +13,7 @@ import { getPostBySlug, getRelatedPosts, incrementPostViews } from '@/lib/data/b
 import { getSettings } from '@/lib/data/settings';
 import { articleSchema, breadcrumbSchema, buildMetadata } from '@/lib/seo';
 import { sanitizeHtml } from '@/lib/security/sanitize';
-import { formatDate, truncate } from '@/lib/utils';
+import { formatDate, toIsoString, truncate } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +89,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </span>
           <span className="inline-flex items-center gap-2">
             <CalendarDays className="size-4 text-secondary" aria-hidden="true" />
-            <time dateTime={post.publishedAt?.toISOString()}>{formatDate(post.publishedAt)}</time>
+            <time dateTime={toIsoString(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
           </span>
           <span className="inline-flex items-center gap-2">
             <Clock className="size-4 text-secondary" aria-hidden="true" />

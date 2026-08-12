@@ -25,6 +25,21 @@ export function formatDateTime(date: Date | string | null | undefined): string {
   });
 }
 
+/**
+ * Normalises a date to an ISO string for `datetime` attributes and JSON-LD.
+ *
+ * Values read back from `unstable_cache` are ISO strings rather than `Date`
+ * instances, because the cache serialises to JSON. Prisma's generated types
+ * still declare them as `Date`, so TypeScript cannot catch the difference and
+ * calling `.toISOString()` directly throws on any cache hit. Always route
+ * through this helper.
+ */
+export function toIsoString(value: Date | string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
 export function formatRelativeTime(date: Date | string): string {
   const target = new Date(date).getTime();
   const diffSeconds = Math.round((target - Date.now()) / 1000);

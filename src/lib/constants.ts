@@ -13,8 +13,10 @@ export const COMPANY_INFO = {
   shortDescription:
     'Enterprise software, secure networks and surveillance infrastructure — engineered, installed and maintained by one accountable team.',
   founded: 2016,
-  phone: '+63 (02) 8888-5273',
-  phoneAlt: '+63 917 123 4567',
+  // Displayed in local form; `telHref`/`toE164` convert to +63 for dialling
+  // and structured data.
+  phone: '0955 557 3319',
+  phoneAlt: '0955 376 4766',
   // Single operating mailbox. These stay separate fields so each can be
   // pointed at a dedicated address later from Admin -> Settings, with no
   // redeploy; the contact page collapses duplicates when they match.

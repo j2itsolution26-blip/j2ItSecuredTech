@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Reveal } from '@/components/shared/Reveal';
+import { telHref } from '@/lib/utils';
 
 export function CallToAction({
   title = 'Ready to scope your next project?',
@@ -32,7 +33,7 @@ export function CallToAction({
             </Button>
 
             <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-              <a href={`tel:${phone.replace(/[^+\d]/g, '')}`}>
+              <a href={telHref(phone)}>
                 <Phone className="size-4 text-secondary" aria-hidden="true" />
                 {phone}
               </a>

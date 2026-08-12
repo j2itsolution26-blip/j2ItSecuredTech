@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { COMPANY_INFO } from '@/lib/constants';
 import { SITE_URL } from '@/lib/env';
-import { toIsoString } from '@/lib/utils';
+import { toE164, toIsoString } from '@/lib/utils';
 
 type PageMetadataInput = {
   title: string;
@@ -96,7 +96,8 @@ export function organizationSchema() {
     description: COMPANY_INFO.description,
     foundingDate: String(COMPANY_INFO.founded),
     email: COMPANY_INFO.email,
-    telephone: COMPANY_INFO.phone,
+    // schema.org expects an internationally dialable number.
+    telephone: toE164(COMPANY_INFO.phone),
     sameAs: Object.values(COMPANY_INFO.social),
     address: {
       '@type': 'PostalAddress',
@@ -117,7 +118,8 @@ export function localBusinessSchema() {
     name: COMPANY_INFO.name,
     image: absoluteUrl('/opengraph-image'),
     url: SITE_URL,
-    telephone: COMPANY_INFO.phone,
+    // schema.org expects an internationally dialable number.
+    telephone: toE164(COMPANY_INFO.phone),
     email: COMPANY_INFO.email,
     priceRange: '₱₱₱',
     address: {

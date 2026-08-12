@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Clock, Mail, MapPin, Phone, Shield } from 'lucide-react';
 import { COMPANY_INFO, FOOTER_NAV } from '@/lib/constants';
 import type { SettingsMap } from '@/lib/data/settings';
+import { telHref } from '@/lib/utils';
 import { FacebookIcon, GitHubIcon, LinkedInIcon, XIcon } from '@/components/shared/BrandIcons';
 
 const SOCIAL_ICONS = [
@@ -53,7 +54,7 @@ export function Footer({ settings }: { settings: SettingsMap }) {
               <li className="flex items-center gap-3">
                 <Phone className="size-4 shrink-0 text-secondary" aria-hidden="true" />
                 <a
-                  href={`tel:${settings['contact.phone'].replace(/[^+\d]/g, '')}`}
+                  href={telHref(settings['contact.phone'])}
                   className="transition-colors hover:text-white"
                 >
                   {settings['contact.phone']}

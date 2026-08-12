@@ -25,6 +25,41 @@ export function formatDateTime(date: Date | string | null | undefined): string {
   });
 }
 
+/** Default country calling code — Philippines. */
+const DEFAULT_DIAL_CODE = '63';
+
+/**
+ * Converts a displayed phone number to E.164 for `tel:` links and schema.org.
+ *
+ * Numbers are written locally (`0955 557 3319`) because that is what visitors
+ * recognise, but a leading zero is meaningless outside the country: it strands
+ * international callers and produces invalid structured data. This maps the
+ * trunk prefix to the country code while leaving numbers that already carry
+ * one untouched.
+ */
+export function toE164(value: string, dialCode = DEFAULT_DIAL_CODE): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  if (trimmed.startsWith('+')) return `+${trimmed.slice(1).replace(/\D/g, '')}`;
+
+  const digits = trimmed.replace(/\D/g, '');
+  if (!digits) return '';
+
+  // Local trunk prefix, e.g. 0955… -> +63955…
+  if (digits.startsWith('0')) return `+${dialCode}${digits.slice(1)}`;
+
+  // Already includes the country code without a plus.
+  if (digits.startsWith(dialCode)) return `+${digits}`;
+
+  return `+${dialCode}${digits}`;
+}
+
+/** Builds a dialable `tel:` href from a displayed number. */
+export function telHref(value: string): string {
+  return `tel:${toE164(value)}`;
+}
+
 /**
  * Normalises a date to an ISO string for `datetime` attributes and JSON-LD.
  *

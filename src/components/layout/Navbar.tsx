@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, ChevronDown, Menu, Phone, Shield, X } from 'lucide-react';
 import { NAV_LINKS, COMPANY_INFO } from '@/lib/constants';
-import { cn } from '@/lib/utils';
+import { cn, telHref } from '@/lib/utils';
 import { Icon } from '@/components/shared/Icon';
 import { Button } from '@/components/ui/button';
 
@@ -157,7 +157,7 @@ export function Navbar({ phone = COMPANY_INFO.phone }: { phone?: string }) {
 
         <div className="hidden items-center gap-4 lg:flex">
           <a
-            href={`tel:${phone.replace(/[^+\d]/g, '')}`}
+            href={telHref(phone)}
             className="flex items-center gap-2 text-xs text-muted transition-colors hover:text-white"
           >
             <Phone className="size-3.5 text-secondary" aria-hidden="true" />
@@ -235,7 +235,7 @@ export function Navbar({ phone = COMPANY_INFO.phone }: { phone?: string }) {
                 </Link>
               </Button>
               <Button asChild variant="outline" block size="lg">
-                <a href={`tel:${phone.replace(/[^+\d]/g, '')}`}>
+                <a href={telHref(phone)}>
                   <Phone className="size-4" aria-hidden="true" />
                   {phone}
                 </a>

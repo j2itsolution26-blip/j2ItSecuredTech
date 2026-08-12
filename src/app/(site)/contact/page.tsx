@@ -6,6 +6,7 @@ import { ContactForm } from '@/components/forms/ContactForm';
 import { COMPANY_INFO } from '@/lib/constants';
 import { getSettings } from '@/lib/data/settings';
 import { breadcrumbSchema, buildMetadata, localBusinessSchema } from '@/lib/seo';
+import { telHref } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,6 @@ export default async function ContactPage() {
     });
   };
 
-  const telHref = (value: string) => `tel:${value.replace(/[^+\d]/g, '')}`;
 
   const channels: { icon: typeof Phone; title: string; lines: ContactLine[] }[] = [
     {

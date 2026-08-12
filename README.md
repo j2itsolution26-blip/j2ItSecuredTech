@@ -15,7 +15,7 @@ biometric security, structured cabling and networking, cloud services and manage
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS v4 with design tokens, shadcn-style primitives on Radix UI |
 | Animation | Framer Motion (entrance, layout) · GSAP (counters, parallax) |
-| Database | PostgreSQL (Neon-ready) via Prisma ORM 7 with the `pg` driver adapter |
+| Database | PostgreSQL via Prisma ORM 7 with the `pg` driver adapter — provider-agnostic (Supabase, Neon, RDS, local) |
 | Auth | Auth.js v5 (NextAuth) — credentials provider, JWT sessions, bcrypt hashing |
 | Validation | Zod schemas shared by client and server · React Hook Form on public forms |
 | Media | Cloudinary signed direct uploads (optional) |
@@ -29,7 +29,7 @@ biometric security, structured cabling and networking, cloud services and manage
 ### 1. Prerequisites
 
 - Node.js 20 or newer
-- A PostgreSQL 14+ database (local, [Neon](https://neon.tech), Supabase or RDS)
+- A PostgreSQL 14+ database ([Supabase](https://supabase.com), [Neon](https://neon.tech), RDS or local)
 
 ### 2. Install
 
@@ -47,7 +47,7 @@ Then set at minimum:
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string. On Neon use the **pooled** host (`…-pooler…`). |
+| `DATABASE_URL` | PostgreSQL connection string. See the endpoint table below — the pooled and direct endpoints are not interchangeable. |
 | `NEXTAUTH_SECRET` | Session signing key — generate with `npx auth secret`. |
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin used for metadata, sitemap and OpenGraph. |
 
@@ -215,15 +215,32 @@ respected globally and inside every animation component.
 
 5. Point the domain at the deployment and confirm `/sitemap.xml` and `/robots.txt` resolve.
 
-**Neon note:** use the pooled connection string for the application. Use the direct (non-pooled)
-string only for `migrate deploy`.
+### Connection endpoints
 
-**Region:** `vercel.json` pins functions to `cle1` (Cleveland) to sit alongside a Neon project in
-AWS **US East 2 (Ohio)**. Keep the two co-located — every page issues several queries, so a
+Managed PostgreSQL providers expose several endpoints for the same database. Using the wrong one
+is the most common deployment failure — migrations hang, or the deployed app exhausts connections.
+
+**Supabase** (Dashboard → **Connect** → Connection string):
+
+| Endpoint | Port | Use for |
+| --- | --- | --- |
+| Session pooler `aws-0-<region>.pooler.supabase.com` | 5432 | Migrations, seeding, local development |
+| Transaction pooler `aws-0-<region>.pooler.supabase.com` | 6543 | The deployed app — append `?pgbouncer=true&connection_limit=1` |
+| Direct `db.<ref>.supabase.co` | 5432 | Avoid — IPv6-only on the free plan |
+
+The transaction pooler runs PgBouncer in transaction mode, which rejects prepared statements;
+`?pgbouncer=true` is required, and migrations cannot run through port 6543.
+
+**Neon:** pooled host (`…-pooler…`) for the app, direct host for `migrate deploy`.
+
+Run `npm run doctor` to have the endpoint identified and validated for you.
+
+**Region:** `vercel.json` pins functions to `iad1` (Washington DC), which pairs with a database in
+`us-east-1`. Keep compute and database co-located — every page issues several queries, so a
 cross-region round trip costs far more than the single hop saved by placing compute near visitors.
-Static assets are served from Vercel's global edge network regardless of this setting. If you move
-the database to another region, change this value to match: `sin1` Singapore, `hkg1` Hong Kong,
-`syd1` Sydney, `iad1` Washington DC.
+Static assets serve from the global edge network regardless. Match this value to your database
+region: `iad1` us-east-1, `cle1` us-east-2, `sfo1` us-west-1, `sin1` Singapore, `syd1` Sydney,
+`fra1` Frankfurt.
 
 ### Rate limiting at scale
 

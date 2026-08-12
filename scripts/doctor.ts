@@ -21,6 +21,49 @@ function redact(url: string): string {
   return url.replace(/:\/\/([^:]+):([^@]+)@/, '://$1:••••••@');
 }
 
+/**
+ * Identifies the hosting provider and endpoint mode, because the correct
+ * choice differs per provider and using the wrong one is a common cause of
+ * migrations hanging or the deployed app exhausting connections.
+ */
+function describeEndpoint(url: string): void {
+  const port = /:(\d{2,5})\//.exec(url)?.[1];
+
+  // --- Supabase -------------------------------------------------------------
+  if (url.includes('supabase.co') || url.includes('supabase.com')) {
+    if (url.includes('pooler.supabase.com')) {
+      if (port === '6543') {
+        info('Supabase transaction pooler (6543) — correct for the app on Vercel.');
+        if (!url.includes('pgbouncer=true')) {
+          info('  ! Append ?pgbouncer=true — PgBouncer transaction mode rejects prepared statements.');
+        }
+        info('  ! Do NOT run migrations through this port; use port 5432.');
+      } else {
+        info('Supabase session pooler (5432) — correct for migrations and seeding.');
+        info('  For the deployed app, prefer the transaction pooler on port 6543.');
+      }
+      return;
+    }
+
+    info('Supabase direct connection (db.*.supabase.co).');
+    info('  ! Direct connections are IPv6-only on the free plan and usually fail');
+    info('    from home networks. Use the session pooler (port 5432) instead.');
+    return;
+  }
+
+  // --- Neon -----------------------------------------------------------------
+  if (url.includes('neon.tech')) {
+    info(
+      url.includes('-pooler')
+        ? 'Neon pooled endpoint — correct for the app on Vercel.'
+        : 'Neon direct endpoint — correct for migrations; use the -pooler host for the app.',
+    );
+    return;
+  }
+
+  info(`PostgreSQL endpoint${port ? ` on port ${port}` : ''}.`);
+}
+
 async function main() {
   console.log('\nJ2 SecureTech — deployment doctor\n');
 
@@ -42,12 +85,7 @@ async function main() {
     return;
   }
 
-  const isPooled = connectionString.includes('-pooler');
-  info(
-    isPooled
-      ? 'Pooled endpoint detected — correct for the running app.'
-      : 'Direct (non-pooled) endpoint — correct for migrations, but use the -pooler host for the app on Vercel.',
-  );
+  describeEndpoint(connectionString);
 
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 

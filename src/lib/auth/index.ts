@@ -3,10 +3,19 @@ import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth/auth.config';
+import { getServerEnv } from '@/lib/env';
 import { loginSchema } from '@/lib/validations/auth';
+
+/**
+ * Validated at module load so a missing or weak NEXTAUTH_SECRET fails the
+ * build or the first request with a message naming the variable — rather than
+ * as an opaque Auth.js error the first time an administrator tries to sign in.
+ */
+const env = getServerEnv();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  secret: env.NEXTAUTH_SECRET,
   providers: [
     Credentials({
       name: 'Credentials',

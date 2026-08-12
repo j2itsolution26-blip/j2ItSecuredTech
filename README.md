@@ -218,6 +218,13 @@ respected globally and inside every animation component.
 **Neon note:** use the pooled connection string for the application. Use the direct (non-pooled)
 string only for `migrate deploy`.
 
+**Region:** `vercel.json` pins functions to `cle1` (Cleveland) to sit alongside a Neon project in
+AWS **US East 2 (Ohio)**. Keep the two co-located — every page issues several queries, so a
+cross-region round trip costs far more than the single hop saved by placing compute near visitors.
+Static assets are served from Vercel's global edge network regardless of this setting. If you move
+the database to another region, change this value to match: `sin1` Singapore, `hkg1` Hong Kong,
+`syd1` Sydney, `iad1` Washington DC.
+
 ### Rate limiting at scale
 
 The limiter is in-process, which covers a single region correctly. For a multi-region deployment,
